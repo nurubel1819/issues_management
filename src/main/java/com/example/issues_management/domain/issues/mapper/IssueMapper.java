@@ -1,0 +1,52 @@
+package com.example.issues_management.domain.issues.mapper;
+
+import com.example.issues_management.domain.issues.dtos.IssueRequest;
+import com.example.issues_management.domain.issues.dtos.IssueResponse;
+import com.example.issues_management.domain.issues.entitys.Issue;
+import com.example.issues_management.domain.projects.entitys.Project;
+import com.example.issues_management.domain.sprints.entitys.Sprint;
+import org.springframework.stereotype.Component;
+
+@Component
+public class IssueMapper {
+
+    public Issue toEntity(IssueRequest request, Project project, Sprint sprint) {
+        return Issue.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .link(request.getLink())
+                .issueStatus(request.getIssueStatus())
+                .expectedCompletionDate(request.getExpectedCompletionDate())
+                .actualCompletionDate(request.getActualCompletionDate())
+                .project(project)
+                .sprint(sprint)
+                .build();
+    }
+
+    public void updateEntity(Issue issue, IssueRequest request, Project project, Sprint sprint) {
+        issue.setTitle(request.getTitle());
+        issue.setDescription(request.getDescription());
+        issue.setLink(request.getLink());
+        issue.setIssueStatus(request.getIssueStatus());
+        issue.setExpectedCompletionDate(request.getExpectedCompletionDate());
+        issue.setActualCompletionDate(request.getActualCompletionDate());
+        issue.setProject(project);
+        issue.setSprint(sprint);
+    }
+
+    public IssueResponse toResponse(Issue issue) {
+        return IssueResponse.builder()
+                .id(issue.getId())
+                .title(issue.getTitle())
+                .description(issue.getDescription())
+                .link(issue.getLink())
+                .issueStatus(issue.getIssueStatus())
+                .expectedCompletionDate(issue.getExpectedCompletionDate())
+                .actualCompletionDate(issue.getActualCompletionDate())
+                .projectId(issue.getProject().getId())
+                .projectName(issue.getProject().getName())
+                .sprintId(issue.getSprint() != null ? issue.getSprint().getId() : null)
+                .sprintName(issue.getSprint() != null ? issue.getSprint().getName() : null)
+                .build();
+    }
+}
