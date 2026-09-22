@@ -4,6 +4,8 @@ import com.example.issues_management.domain.issues.enums.EstimationStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 public class AssignForEstimationRequest {
     @NotNull
@@ -14,4 +16,5 @@ public class AssignForEstimationRequest {
     private Integer estimateMinute;
     @NotNull
     private EstimationStatus estimationStatus;
+    private LocalDateTime deliverDate;
 }

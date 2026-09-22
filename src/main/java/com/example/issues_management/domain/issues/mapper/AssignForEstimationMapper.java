@@ -17,6 +17,7 @@ public class AssignForEstimationMapper {
                 .estimateHour(request.getEstimateHour())
                 .estimateMinute(request.getEstimateMinute())
                 .estimationStatus(request.getEstimationStatus())
+                .deliverDate(request.getDeliverDate())
                 .build();
     }
 
@@ -24,6 +25,7 @@ public class AssignForEstimationMapper {
         entity.setEstimateHour(request.getEstimateHour());
         entity.setEstimateMinute(request.getEstimateMinute());
         entity.setEstimationStatus(request.getEstimationStatus());
+        entity.setDeliverDate(request.getDeliverDate());
     }
 
     public AssignForEstimationResponse toResponse(AssignForEstimation entity) {
