@@ -63,7 +63,7 @@ public class AdminUserInitializer implements CommandLineRunner {
 	}
 
 	private void initializeRoles() {
-		List<String> defaultRoles = List.of("ADMIN", "USER", "DEVELOPER", "TESTER");
+		List<String> defaultRoles = List.of("ADMIN", "USER");
 
 		for (String roleName : defaultRoles) {
 			if (!roleRepository.existsByName(roleName)) {

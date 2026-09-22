@@ -6,6 +6,8 @@ import com.example.issues_management.auth.dto.LoginRequest;
 import com.example.issues_management.auth.dto.RegisterRequest;
 import com.example.issues_management.auth.entity.Role;
 import com.example.issues_management.auth.entity.User;
+import com.example.issues_management.auth.entity.UserRole;
+import com.example.issues_management.auth.repository.RoleRepository;
 import com.example.issues_management.auth.repository.UserRepository;
 import com.example.issues_management.auth.security.JwtService;
 import com.example.issues_management.auth.service.AuthService;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +28,7 @@ import java.util.Map;
 public class AuthServiceImpl implements AuthService {
 
 	private final UserRepository userRepository;
+	private final RoleRepository roleRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
 	private final AuthenticationManager authenticationManager;
@@ -36,18 +40,30 @@ public class AuthServiceImpl implements AuthService {
 			throw new IllegalArgumentException("Email is already in use");
 		}
 
+		// Get default USER role
+		Role userRole = roleRepository.findByName("USER")
+			.orElseThrow(() -> new IllegalStateException("Default USER role not found"));
+
 		User user = User.builder()
 			.fullName(request.fullName())
 			.email(request.email())
 			.password(passwordEncoder.encode(request.password()))
+			.userRoles(new ArrayList<>())
 			.build();
+
+		// Assign USER role
+		UserRole userRoleAssignment = UserRole.builder()
+			.user(user)
+			.role(userRole)
+			.build();
+
+		user.getUserRoles().add(userRoleAssignment);
 
 		User savedUser = userRepository.save(user);
 
-		List<String> roleNames = savedUser.getUserRoles() != null ?
-			savedUser.getUserRoles().stream()
-				.map(ur -> ur.getRole().getName())
-				.toList() : List.of();
+		List<String> roleNames = savedUser.getUserRoles().stream()
+			.map(ur -> ur.getRole().getName())
+			.toList();
 
 		String jwtToken = jwtService.generateToken(savedUser, Map.of("roles", roleNames));
 
