@@ -10,6 +10,7 @@ import com.example.issues_management.auth.repository.RoleRepository;
 import com.example.issues_management.auth.repository.UserRepository;
 import com.example.issues_management.auth.repository.UserRoleRepository;
 import com.example.issues_management.common.exception.ResourceNotFoundException;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class RoleService {
 	private final RoleRepository roleRepository;
 	private final UserRepository userRepository;
 	private final UserRoleRepository userRoleRepository;
+	private final EntityManager entityManager;
 
 	@Transactional
 	public RoleResponse createRole(RoleRequest request) {
@@ -88,14 +90,27 @@ public class RoleService {
 
 	@Transactional
 	public void assignRolesToUser(AssignRoleRequest request) {
+		// Verify user exists
 		User user = userRepository.findById(request.getUserId())
 			.orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
 
-		// Clear existing roles
+		// Delete existing roles using JPQL query
+		userRoleRepository.deleteByUserId(request.getUserId());
+
+		// Flush to ensure deletes are executed
+		entityManager.flush();
+
+		// Detach user to avoid merge issues
+		entityManager.detach(user);
+
+		// Reload user with fresh state
+		user = userRepository.findById(request.getUserId())
+			.orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
+
+		// Initialize collection if needed
 		if (user.getUserRoles() == null) {
 			user.setUserRoles(new ArrayList<>());
 		}
-		user.getUserRoles().clear();
 
 		// Assign new roles
 		for (Long roleId : request.getRoleIds()) {
