@@ -65,7 +65,11 @@ public class AuthServiceImpl implements AuthService {
 			.map(ur -> ur.getRole().getName())
 			.toList();
 
-		String jwtToken = jwtService.generateToken(savedUser, Map.of("roles", roleNames));
+		//String jwtToken = jwtService.generateToken(savedUser, Map.of("roles", roleNames));
+		String jwtToken = jwtService.generateToken(
+				savedUser,
+				Map.of("roles", roleNames, "userId", savedUser.getId())
+		);
 
 		return new AuthResponse(
 			jwtToken,
@@ -94,7 +98,11 @@ public class AuthServiceImpl implements AuthService {
 				.map(ur -> ur.getRole().getName())
 				.toList() : List.of();
 
-		String jwtToken = jwtService.generateToken(user, Map.of("roles", roleNames));
+		//String jwtToken = jwtService.generateToken(user, Map.of("roles", roleNames));
+		String jwtToken = jwtService.generateToken(
+				user,
+				Map.of("roles", roleNames, "userId", user.getId())
+		);
 		return new AuthResponse(
 			jwtToken,
 			"Bearer",

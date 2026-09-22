@@ -7,6 +7,7 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
@@ -51,16 +52,14 @@ public abstract class BaseEntity implements Serializable {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.isAuthenticated()
-                && authentication.getPrincipal() instanceof UserDetails) {
-                Object principal = authentication.getPrincipal();
+                    && authentication.getPrincipal() instanceof Jwt jwt) {
 
-                // If principal has getId() method (User entity implements UserDetails)
-                if (principal instanceof com.example.issues_management.auth.entity.User) {
-                    return ((com.example.issues_management.auth.entity.User) principal).getId();
+                Object userId = jwt.getClaim("userId");
+                if (userId != null) {
+                    return Long.valueOf(userId.toString());
                 }
             }
         } catch (Exception e) {
-            // If we can't get the user ID, return null
             return null;
         }
         return null;
