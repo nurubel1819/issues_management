@@ -106,10 +106,16 @@ public class SecurityConfig {
 	@Bean
 	public Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
 		return jwt -> {
-			String role = jwt.getClaimAsString("role");
-			Collection<GrantedAuthority> authorities = role == null
-				? List.of()
-				: List.of(new SimpleGrantedAuthority("ROLE_" + role));
+			List<String> roles = jwt.getClaimAsStringList("roles");
+			Collection<GrantedAuthority> authorities;
+			if (roles == null || roles.isEmpty()) {
+				authorities = List.of();
+			} else {
+				authorities = roles.stream()
+					.map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+					.map(auth -> (GrantedAuthority) auth)
+					.toList();
+			}
 			return new JwtAuthenticationToken(jwt, authorities);
 		};
 	}

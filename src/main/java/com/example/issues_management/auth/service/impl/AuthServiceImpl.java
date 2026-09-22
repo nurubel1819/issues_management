@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -39,18 +40,23 @@ public class AuthServiceImpl implements AuthService {
 			.fullName(request.fullName())
 			.email(request.email())
 			.password(passwordEncoder.encode(request.password()))
-			.role(Role.USER)
 			.build();
 
 		User savedUser = userRepository.save(user);
-		String jwtToken = jwtService.generateToken(savedUser, Map.of("role", savedUser.getRole().name()));
+
+		List<String> roleNames = savedUser.getUserRoles() != null ?
+			savedUser.getUserRoles().stream()
+				.map(ur -> ur.getRole().getName())
+				.toList() : List.of();
+
+		String jwtToken = jwtService.generateToken(savedUser, Map.of("roles", roleNames));
 
 		return new AuthResponse(
 			jwtToken,
 			"Bearer",
 			jwtService.getExpirationMs(),
 			savedUser.getEmail(),
-			savedUser.getRole()
+			roleNames
 		);
 	}
 
@@ -67,13 +73,18 @@ public class AuthServiceImpl implements AuthService {
 		User user = userRepository.findByEmail(request.email())
 			.orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
-		String jwtToken = jwtService.generateToken(user, Map.of("role", user.getRole().name()));
+		List<String> roleNames = user.getUserRoles() != null ?
+			user.getUserRoles().stream()
+				.map(ur -> ur.getRole().getName())
+				.toList() : List.of();
+
+		String jwtToken = jwtService.generateToken(user, Map.of("roles", roleNames));
 		return new AuthResponse(
 			jwtToken,
 			"Bearer",
 			jwtService.getExpirationMs(),
 			user.getEmail(),
-			user.getRole()
+			roleNames
 		);
 	}
 }
