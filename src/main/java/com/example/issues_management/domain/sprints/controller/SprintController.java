@@ -1,5 +1,7 @@
 package com.example.issues_management.domain.sprints.controller;
 
+import com.example.issues_management.domain.issues.enums.EstimationStatus;
+import com.example.issues_management.domain.issues.enums.IssueStatus;
 import com.example.issues_management.domain.sprints.dtos.SprintReportResponse;
 import com.example.issues_management.domain.sprints.dtos.SprintRequest;
 import com.example.issues_management.domain.sprints.dtos.SprintResponse;
@@ -69,8 +71,11 @@ public class SprintController {
 
     @GetMapping("/details/dashboard/{sprintId}")
     @Operation(summary = "Get sprint dashboard details",
-            description = "Returns overview, issue-status distribution, estimation summary, and delivery details for a sprint")
-    public ResponseEntity<SprintReportResponse> getSprintReport(@PathVariable Long sprintId) {
-        return ResponseEntity.ok(sprintReportService.getSprintReport(sprintId));
+            description = "Returns overview, issue-status distribution, estimation summary, and delivery details for a sprint. Optionally filter by issueStatus and/or estimationStatus.")
+    public ResponseEntity<SprintReportResponse> getSprintReport(
+            @PathVariable Long sprintId,
+            @RequestParam(required = false) IssueStatus issueStatus,
+            @RequestParam(required = false) EstimationStatus estimationStatus) {
+        return ResponseEntity.ok(sprintReportService.getSprintReport(sprintId, issueStatus, estimationStatus));
     }
 }

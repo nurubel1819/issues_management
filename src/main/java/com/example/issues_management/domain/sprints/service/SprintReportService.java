@@ -2,6 +2,10 @@ package com.example.issues_management.domain.sprints.service;
 
 import com.example.issues_management.common.exception.ResourceNotFoundException;
 import com.example.issues_management.domain.issues.entitys.AssignForEstimation;
+import com.example.issues_management.domain.issues.entitys.Issue;
+import com.example.issues_management.domain.issues.enums.EstimationStatus;
+import com.example.issues_management.domain.issues.enums.IssueStatus;
+
 import com.example.issues_management.domain.issues.repo.AssignForEstimationRepository;
 import com.example.issues_management.domain.issues.repo.IssueRepository;
 import com.example.issues_management.domain.sprints.dtos.AssignmentDeliveryDetail;
@@ -25,21 +29,24 @@ public class SprintReportService {
     private final AssignForEstimationRepository assignForEstimationRepository;
 
     @Transactional(readOnly = true)
-    public SprintReportResponse getSprintReport(Long sprintId) {
+    public SprintReportResponse getSprintReport(Long sprintId, IssueStatus issueStatus, EstimationStatus estimationStatus) {
 
         Sprint sprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new ResourceNotFoundException("Sprint not found with id: " + sprintId));
 
-        long totalIssues = issueRepository.findBySprintId(sprintId).size();
+        // Filtered issue list
+        List<Issue> issues = issueRepository.findBySprintIdAndOptionalStatus(sprintId, issueStatus);
+        long totalIssues = issues.size();
 
-        // Issue status wise distribution
         Map<String, Long> issueStatusDistribution = issueRepository.countByStatusForSprint(sprintId).stream()
                 .collect(Collectors.toMap(
                         row -> row.getStatus().name(),
                         IssueRepository.IssueStatusCount::getTotal
                 ));
 
-        List<AssignForEstimation> assignments = assignForEstimationRepository.findByIssue_Sprint_Id(sprintId);
+        // Filtered assignment list
+        List<AssignForEstimation> assignments = assignForEstimationRepository
+                .findByIssue_Sprint_IdAndOptionalStatus(sprintId, estimationStatus);
 
         long totalAssignments = assignments.size();
 
@@ -48,7 +55,6 @@ public class SprintReportService {
                 .distinct()
                 .count();
 
-        // Total estimated time
         long totalMinutesRaw = assignments.stream()
                 .mapToLong(a -> {
                     long hour = a.getEstimateHour() != null ? a.getEstimateHour() : 0;
@@ -59,7 +65,6 @@ public class SprintReportService {
         long totalEstimatedHour = totalMinutesRaw / 60;
         long totalEstimatedMinute = totalMinutesRaw % 60;
 
-        // Estimation status wise distribution
         Map<String, Long> estimationStatusDistribution = assignForEstimationRepository
                 .countByEstimationStatusForSprint(sprintId).stream()
                 .collect(Collectors.toMap(
@@ -67,7 +72,6 @@ public class SprintReportService {
                         AssignForEstimationRepository.EstimationStatusCount::getTotal
                 ));
 
-        // Delivery details estimation,status and deliver date
         List<AssignmentDeliveryDetail> deliveries = assignments.stream()
                 .map(a -> AssignmentDeliveryDetail.builder()
                         .issueId(a.getIssue().getId())
@@ -87,6 +91,8 @@ public class SprintReportService {
                 .active(sprint.isActive())
                 .startDate(sprint.getStartDate())
                 .endDate(sprint.getEndDate())
+                .filteredIssueStatus(issueStatus)
+                .filteredEstimationStatus(estimationStatus)
                 .totalIssues(totalIssues)
                 .totalAssignments(totalAssignments)
                 .totalDistinctDevelopers(totalDistinctDevelopers)

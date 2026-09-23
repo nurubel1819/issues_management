@@ -15,12 +15,25 @@ public interface AssignForEstimationRepository extends JpaRepository<AssignForEs
     Optional<AssignForEstimation> findByIssueIdAndAssignId(Long issueId, Long userId);
     boolean existsByIssueIdAndAssignId(Long issueId, Long userId);
 
-    List<AssignForEstimation> findByIssue_Sprint_Id(Long sprintId);
+    @Query("select a from AssignForEstimation a " +
+            "join fetch a.issue i " +
+            "join fetch a.assign u " +
+            "where i.sprint.id = :sprintId")
+    List<AssignForEstimation> findByIssue_Sprint_Id(@Param("sprintId") Long sprintId);
 
     @Query("select a.estimationStatus as status, count(a) as total " +
             "from AssignForEstimation a where a.issue.sprint.id = :sprintId " +
             "group by a.estimationStatus")
     List<EstimationStatusCount> countByEstimationStatusForSprint(@Param("sprintId") Long sprintId);
+
+    @Query("select a from AssignForEstimation a " +
+            "join fetch a.issue i " +
+            "join fetch a.assign u " +
+            "where i.sprint.id = :sprintId " +
+            "and (:estimationStatus is null or a.estimationStatus = :estimationStatus)")
+    List<AssignForEstimation> findByIssue_Sprint_IdAndOptionalStatus(
+            @Param("sprintId") Long sprintId,
+            @Param("estimationStatus") EstimationStatus estimationStatus);
 
     interface EstimationStatusCount {
         EstimationStatus getStatus();
