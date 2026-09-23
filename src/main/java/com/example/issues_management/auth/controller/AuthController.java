@@ -3,6 +3,7 @@ package com.example.issues_management.auth.controller;
 
 import com.example.issues_management.auth.dto.AuthResponse;
 import com.example.issues_management.auth.dto.LoginRequest;
+import com.example.issues_management.auth.dto.RefreshTokenRequest;
 import com.example.issues_management.auth.dto.RegisterRequest;
 import com.example.issues_management.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,5 +37,11 @@ public class AuthController {
 	@Operation(summary = "Login", description = "Authenticates a user and returns JWT access token")
 	public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
 		return ResponseEntity.ok(authService.login(request));
+	}
+
+	@PostMapping("/refresh-token")
+	@Operation(summary = "Refresh access token", description = "Generates a new access token using a valid refresh token")
+	public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+		return ResponseEntity.ok(authService.refreshToken(request));
 	}
 }

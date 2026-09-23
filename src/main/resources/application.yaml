@@ -40,6 +40,7 @@ app:
       # 64+ byte base64 key for HS256/HS512 signing.
       secret: bXktaW50ZXJuYWwtand0LXNlY3JldC1rZXktZm9yLXByb2plY3Qtd2l0aC1haS0yMDI2LXNlY3VyZS1zdHJpbmc=
       expiration-ms: 86400000
+      refresh-expiration-ms: 604800000
     admin:
       full-name: System Admin
       email: admin@example.com

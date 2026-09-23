@@ -55,4 +55,16 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 	}
+
+	@ExceptionHandler(IllegalStateException.class)
+	public ResponseEntity<ApiErrorResponse> handleIllegalStateException(IllegalStateException exception) {
+		ApiErrorResponse response = new ApiErrorResponse(
+				LocalDateTime.now(),
+				HttpStatus.BAD_REQUEST.value(),
+				exception.getMessage(),
+				Map.of()
+		);
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+	}
 }
