@@ -2,6 +2,8 @@ package com.example.issues_management.domain.issues.controller;
 
 import com.example.issues_management.domain.issues.dtos.AssignForEstimationRequest;
 import com.example.issues_management.domain.issues.dtos.AssignForEstimationResponse;
+import com.example.issues_management.domain.issues.dtos.UserEstimationDetailsResponse;
+import com.example.issues_management.domain.issues.enums.EstimationStatus;
 import com.example.issues_management.domain.issues.service.AssignForEstimationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -43,9 +45,12 @@ public class AssignForEstimationController {
     }
 
     @GetMapping("/user/{userId}")
-    @Operation(summary = "Get all issue assignments for a user")
-    public ResponseEntity<List<AssignForEstimationResponse>> getByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(service.getByUser(userId));
+    @Operation(summary = "Get all issue assignments for a user",
+            description = "Returns issue assignments for a user. Optionally filter by estimationStatus.")
+    public ResponseEntity<List<AssignForEstimationResponse>> getByUser(
+            @PathVariable Long userId,
+            @RequestParam(required = false) EstimationStatus status) {
+        return ResponseEntity.ok(service.getByUser(userId, status));
     }
 
     @DeleteMapping("/{id}")
@@ -53,5 +58,14 @@ public class AssignForEstimationController {
     public ResponseEntity<Void> remove(@PathVariable Long id) {
         service.remove(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/user/details/{userId}")
+    @Operation(summary = "Get user's estimation details",
+            description = "Returns status-wise count, status-wise total estimated time, and last delivery date for a user. Optionally filter by estimationStatus.")
+    public ResponseEntity<UserEstimationDetailsResponse> getUserEstimationDetails(
+            @PathVariable Long userId,
+            @RequestParam(required = false) EstimationStatus status) {
+        return ResponseEntity.ok(service.getUserEstimationDetails(userId, status));
     }
 }

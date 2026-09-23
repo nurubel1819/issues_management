@@ -6,12 +6,19 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface AssignForEstimationRepository extends JpaRepository<AssignForEstimation, Long> {
     List<AssignForEstimation> findByIssueId(Long issueId);
     List<AssignForEstimation> findByAssignId(Long userId);
+    @Query("select a from AssignForEstimation a " +
+            "where a.assign.id = :userId " +
+            "and (:status is null or a.estimationStatus = :status)")
+    List<AssignForEstimation> findByAssignIdAndOptionalStatus(
+            @Param("userId") Long userId,
+            @Param("status") EstimationStatus status);
     Optional<AssignForEstimation> findByIssueIdAndAssignId(Long issueId, Long userId);
     boolean existsByIssueIdAndAssignId(Long issueId, Long userId);
 
@@ -39,4 +46,28 @@ public interface AssignForEstimationRepository extends JpaRepository<AssignForEs
         EstimationStatus getStatus();
         Long getTotal();
     }
+
+    @Query("select a.estimationStatus as status, count(a) as total, " +
+            "coalesce(sum(a.estimateHour), 0) as totalHour, " +
+            "coalesce(sum(a.estimateMinute), 0) as totalMinute " +
+            "from AssignForEstimation a where a.assign.id = :userId " +
+            "and (:status is null or a.estimationStatus = :status) " +
+            "group by a.estimationStatus")
+    List<UserEstimationStatusSummary> summarizeByUserAndOptionalStatus(
+            @Param("userId") Long userId,
+            @Param("status") EstimationStatus status);
+
+    interface UserEstimationStatusSummary {
+        EstimationStatus getStatus();
+        Long getTotal();
+        Long getTotalHour();
+        Long getTotalMinute();
+    }
+
+    @Query("select max(a.deliverDate) from AssignForEstimation a " +
+            "where a.assign.id = :userId " +
+            "and (:status is null or a.estimationStatus = :status)")
+    LocalDateTime findLastDeliverDateByUserAndOptionalStatus(
+            @Param("userId") Long userId,
+            @Param("status") EstimationStatus status);
 }
