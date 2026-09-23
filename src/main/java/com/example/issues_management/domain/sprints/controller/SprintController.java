@@ -1,7 +1,9 @@
 package com.example.issues_management.domain.sprints.controller;
 
+import com.example.issues_management.domain.sprints.dtos.SprintReportResponse;
 import com.example.issues_management.domain.sprints.dtos.SprintRequest;
 import com.example.issues_management.domain.sprints.dtos.SprintResponse;
+import com.example.issues_management.domain.sprints.service.SprintReportService;
 import com.example.issues_management.domain.sprints.service.SprintService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -23,6 +25,7 @@ import java.util.List;
 public class SprintController {
 
     private final SprintService sprintService;
+    private final SprintReportService sprintReportService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -62,5 +65,12 @@ public class SprintController {
     public ResponseEntity<Void> deleteSprint(@PathVariable Long id) {
         sprintService.deleteSprint(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/details/dashboard/{sprintId}")
+    @Operation(summary = "Get sprint dashboard details",
+            description = "Returns overview, issue-status distribution, estimation summary, and delivery details for a sprint")
+    public ResponseEntity<SprintReportResponse> getSprintReport(@PathVariable Long sprintId) {
+        return ResponseEntity.ok(sprintReportService.getSprintReport(sprintId));
     }
 }
