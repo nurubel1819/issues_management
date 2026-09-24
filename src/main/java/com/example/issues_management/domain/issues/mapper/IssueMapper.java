@@ -16,7 +16,9 @@ public class IssueMapper {
                 .issueTrackingNumber(request.getIssueTrackingNumber())
                 .description(request.getDescription())
                 .link(request.getLink())
+                .redmineLink(request.getRedmineLink())
                 .issueStatus(request.getIssueStatus())
+                .issueType(request.getIssueType())
                 .expectedCompletionDate(request.getExpectedCompletionDate())
                 .actualCompletionDate(request.getActualCompletionDate())
                 .project(project)
@@ -29,7 +31,9 @@ public class IssueMapper {
         issue.setIssueTrackingNumber(request.getIssueTrackingNumber());
         issue.setDescription(request.getDescription());
         issue.setLink(request.getLink());
+        issue.setRedmineLink(request.getRedmineLink());
         issue.setIssueStatus(request.getIssueStatus());
+        issue.setIssueType(request.getIssueType());
         issue.setExpectedCompletionDate(request.getExpectedCompletionDate());
         issue.setActualCompletionDate(request.getActualCompletionDate());
         issue.setProject(project);
@@ -43,7 +47,9 @@ public class IssueMapper {
                 .issueTrackingNumber(issue.getIssueTrackingNumber())
                 .description(issue.getDescription())
                 .link(issue.getLink())
+                .redmineLink(issue.getRedmineLink())
                 .issueStatus(issue.getIssueStatus())
+                .issueType(issue.getIssueType())
                 .expectedCompletionDate(issue.getExpectedCompletionDate())
                 .actualCompletionDate(issue.getActualCompletionDate())
                 .projectId(issue.getProject().getId())

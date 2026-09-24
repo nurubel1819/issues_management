@@ -2,6 +2,7 @@ package com.example.issues_management.domain.issues.entitys;
 
 import com.example.issues_management.common.entity.BaseEntity;
 import com.example.issues_management.domain.issues.enums.IssueStatus;
+import com.example.issues_management.domain.issues.enums.IssueType;
 import com.example.issues_management.domain.projects.entitys.Project;
 import com.example.issues_management.domain.sprints.entitys.Sprint;
 import jakarta.persistence.*;
@@ -29,9 +30,16 @@ public class Issue extends BaseEntity {
     @Column(length = 1000)
     private String link;
 
+    @Column(length = 1000)
+    private String redmineLink;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private IssueStatus issueStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private IssueType issueType;
 
     private LocalDate expectedCompletionDate;
     private LocalDate actualCompletionDate;
