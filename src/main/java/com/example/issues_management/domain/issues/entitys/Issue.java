@@ -22,6 +22,8 @@ public class Issue extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
+    private String issueTrackingNumber;
+
     @Column(length = 4000)
     private String description;
 

@@ -13,6 +13,7 @@ public class IssueMapper {
     public Issue toEntity(IssueRequest request, Project project, Sprint sprint) {
         return Issue.builder()
                 .title(request.getTitle())
+                .issueTrackingNumber(request.getIssueTrackingNumber())
                 .description(request.getDescription())
                 .link(request.getLink())
                 .issueStatus(request.getIssueStatus())
@@ -25,6 +26,7 @@ public class IssueMapper {
 
     public void updateEntity(Issue issue, IssueRequest request, Project project, Sprint sprint) {
         issue.setTitle(request.getTitle());
+        issue.setIssueTrackingNumber(request.getIssueTrackingNumber());
         issue.setDescription(request.getDescription());
         issue.setLink(request.getLink());
         issue.setIssueStatus(request.getIssueStatus());
@@ -38,6 +40,7 @@ public class IssueMapper {
         return IssueResponse.builder()
                 .id(issue.getId())
                 .title(issue.getTitle())
+                .issueTrackingNumber(issue.getIssueTrackingNumber())
                 .description(issue.getDescription())
                 .link(issue.getLink())
                 .issueStatus(issue.getIssueStatus())

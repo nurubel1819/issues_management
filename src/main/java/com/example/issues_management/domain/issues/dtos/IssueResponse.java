@@ -8,6 +8,7 @@ import java.time.LocalDate;
 public class IssueResponse {
     private Long id;
     private String title;
+    private String issueTrackingNumber;
     private String description;
     private String link;
     private IssueStatus issueStatus;

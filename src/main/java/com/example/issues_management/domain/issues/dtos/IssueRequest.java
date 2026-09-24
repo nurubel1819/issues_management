@@ -10,6 +10,7 @@ import java.time.LocalDate;
 public class IssueRequest {
     @NotBlank
     private String title;
+    private String issueTrackingNumber;
     private String description;
     private String link;
     @NotNull
