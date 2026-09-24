@@ -39,13 +39,10 @@ public class IssueService {
         Project project = resolveProject(request.getProjectId());
         Sprint sprint = resolveSprint(request.getSprintId());
 
-        // ধাপ ১ — প্রথমে Issue টা save করে ফেলা হচ্ছে (এতে issue.id পাওয়া যায়)
         Issue savedIssue = issueRepository.save(issueMapper.toEntity(request, project, sprint));
 
-        // ধাপ ২ — একই request-এর issueRoleIds ব্যবহার করে join row গুলো তৈরি করা হচ্ছে
         attachIssueRoles(savedIssue, request.getIssueRoleIds());
 
-        // ধাপ ৩ — issue + assigned roles একসাথে response-এ ফেরত দেওয়া হচ্ছে
         return toFullResponse(savedIssue);
     }
 
@@ -88,7 +85,6 @@ public class IssueService {
         issueMapper.updateEntity(issue, request, project, sprint);
         Issue updatedIssue = issueRepository.save(issue);
 
-        // update-এ পুরনো role assignment মুছে নতুন করে সেট করা হচ্ছে (replace strategy)
         issueIssueRoleRepository.deleteByIssueId(updatedIssue.getId());
         attachIssueRoles(updatedIssue, request.getIssueRoleIds());
 
@@ -108,12 +104,11 @@ public class IssueService {
 
     private void attachIssueRoles(Issue issue, List<Long> issueRoleIds) {
         if (issueRoleIds == null || issueRoleIds.isEmpty()) {
-            return; // role না দিলে কিছু করার দরকার নেই — এটা optional
+            return;
         }
 
         List<IssueRole> roles = issueRoleRepository.findAllById(issueRoleIds);
 
-        // পাঠানো id-এর সংখ্যা আর পাওয়া role-এর সংখ্যা না মিললে মানে কোনো invalid id ছিল
         if (roles.size() != issueRoleIds.size()) {
             throw new ResourceNotFoundException("One or more issue role IDs are invalid");
         }
