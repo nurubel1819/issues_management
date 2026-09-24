@@ -31,6 +31,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.SecretKey;
 import java.util.Collection;
@@ -41,82 +44,102 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	private final CustomUserDetailsService customUserDetailsService;
-	private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-	private final RestAccessDeniedHandler restAccessDeniedHandler;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final RestAccessDeniedHandler restAccessDeniedHandler;
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(
-		HttpSecurity http,
-		ApiBasicAuthenticationProvider apiBasicAuthenticationProvider
-	) throws Exception {
-		http
-			.csrf(csrf -> csrf.disable())
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.exceptionHandling(exception -> exception
-				.authenticationEntryPoint(restAuthenticationEntryPoint)
-				.accessDeniedHandler(restAccessDeniedHandler)
-			)
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers(
-					"/api/auth/**",
-					"/swagger-ui/**",
-					"/swagger-ui.html",
-					"/v3/api-docs/**"
-				).permitAll()
-				.anyRequest().authenticated()
-			)
-			.oauth2ResourceServer(oauth2 -> oauth2
-				.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-			)
-			.httpBasic(Customizer.withDefaults())
-			.authenticationProvider(authenticationProvider())
-			.authenticationProvider(apiBasicAuthenticationProvider)
-		;
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            ApiBasicAuthenticationProvider apiBasicAuthenticationProvider
+    ) throws Exception {
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(restAuthenticationEntryPoint)
+                        .accessDeniedHandler(restAccessDeniedHandler)
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                )
+                .httpBasic(Customizer.withDefaults())
+                .authenticationProvider(authenticationProvider())
+                .authenticationProvider(apiBasicAuthenticationProvider)
+        ;
 
-		return http.build();
-	}
+        return http.build();
+    }
 
-	@Bean
-	public AuthenticationProvider authenticationProvider() {
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(customUserDetailsService);
-		authProvider.setPasswordEncoder(passwordEncoder());
-		return authProvider;
-	}
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://192.168.7.*:*",
+                "http://localhost:*",
+                "http://127.0.0.1:*"
+        ));
 
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-		return config.getAuthenticationManager();
-	}
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowCredentials(true);
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
-	@Bean
-	public JwtDecoder jwtDecoder(@Value("${app.security.jwt.secret}") String jwtSecret) {
-		byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-		SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
-		return NimbusJwtDecoder.withSecretKey(secretKey)
-			.macAlgorithm(MacAlgorithm.HS256)
-			.build();
-	}
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(customUserDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
 
-	@Bean
-	public Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
-		return jwt -> {
-			List<String> roles = jwt.getClaimAsStringList("roles");
-			Collection<GrantedAuthority> authorities;
-			if (roles == null || roles.isEmpty()) {
-				authorities = List.of();
-			} else {
-				authorities = roles.stream()
-					.map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-					.map(auth -> (GrantedAuthority) auth)
-					.toList();
-			}
-			return new JwtAuthenticationToken(jwt, authorities);
-		};
-	}
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder(@Value("${app.security.jwt.secret}") String jwtSecret) {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
+        return NimbusJwtDecoder.withSecretKey(secretKey)
+                .macAlgorithm(MacAlgorithm.HS256)
+                .build();
+    }
+
+    @Bean
+    public Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
+        return jwt -> {
+            List<String> roles = jwt.getClaimAsStringList("roles");
+            Collection<GrantedAuthority> authorities;
+            if (roles == null || roles.isEmpty()) {
+                authorities = List.of();
+            } else {
+                authorities = roles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                        .map(auth -> (GrantedAuthority) auth)
+                        .toList();
+            }
+            return new JwtAuthenticationToken(jwt, authorities);
+        };
+    }
 }
