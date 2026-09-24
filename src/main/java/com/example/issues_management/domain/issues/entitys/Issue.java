@@ -9,7 +9,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-
 @Getter
 @Setter
 @Entity
@@ -34,16 +33,13 @@ public class Issue extends BaseEntity {
     @Column(nullable = false)
     private IssueStatus issueStatus;
 
-
     private LocalDate expectedCompletionDate;
     private LocalDate actualCompletionDate;
 
-    // Issue -> Project (unidirectional many-to-one)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    // Issue -> Sprint (unidirectional many-to-one, nullable = issue may not be in a sprint yet)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sprint_id")
     private Sprint sprint;

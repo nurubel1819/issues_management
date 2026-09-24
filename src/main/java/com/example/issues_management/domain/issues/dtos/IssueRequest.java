@@ -4,7 +4,9 @@ import com.example.issues_management.domain.issues.enums.IssueStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 public class IssueRequest {
@@ -19,5 +21,7 @@ public class IssueRequest {
     private LocalDate actualCompletionDate;
     @NotNull
     private Long projectId;
-    private Long sprintId; // nullable — issue may not be in a sprint yet
+    private Long sprintId;
+
+    private List<Long> issueRoleIds;
 }

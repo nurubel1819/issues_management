@@ -2,7 +2,9 @@ package com.example.issues_management.domain.issues.dtos;
 
 import com.example.issues_management.domain.issues.enums.IssueStatus;
 import lombok.*;
+
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 public class IssueResponse {
@@ -18,4 +20,5 @@ public class IssueResponse {
     private String projectName;
     private Long sprintId;
     private String sprintName;
+    private List<IssueRoleResponse> issueRoles;
 }

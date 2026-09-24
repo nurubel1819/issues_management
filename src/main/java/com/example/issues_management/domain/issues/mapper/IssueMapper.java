@@ -36,7 +36,7 @@ public class IssueMapper {
         issue.setSprint(sprint);
     }
 
-    public IssueResponse toResponse(Issue issue) {
+    public IssueResponse toResponseWithoutRoles(Issue issue) {
         return IssueResponse.builder()
                 .id(issue.getId())
                 .title(issue.getTitle())
