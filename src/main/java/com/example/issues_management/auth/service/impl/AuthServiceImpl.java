@@ -70,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = jwtService.generateRefreshToken(savedUser);
 
         return new AuthResponse(
+                savedUser.getId(),
                 jwtToken,
                 refreshToken,
                 "Bearer",
@@ -104,6 +105,7 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = jwtService.generateRefreshToken(user);
 
         return new AuthResponse(
+                user.getId(),
                 jwtToken,
                 refreshToken,
                 "Bearer",
@@ -142,6 +144,7 @@ public class AuthServiceImpl implements AuthService {
         String newRefreshToken = jwtService.generateRefreshToken(user);
 
         return new AuthResponse(
+                user.getId(),
                 newAccessToken,
                 newRefreshToken,
                 "Bearer",
