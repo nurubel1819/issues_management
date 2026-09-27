@@ -50,7 +50,7 @@ public class SprintReportService {
 
         long totalAssignments = assignments.size();
 
-        long totalDistinctDevelopers = assignments.stream()
+        long totalDistinctUser = assignments.stream()
                 .map(a -> a.getAssign().getId())
                 .distinct()
                 .count();
@@ -95,7 +95,7 @@ public class SprintReportService {
                 .filteredEstimationStatus(estimationStatus)
                 .totalIssues(totalIssues)
                 .totalAssignments(totalAssignments)
-                .totalDistinctDevelopers(totalDistinctDevelopers)
+                .totalDistinctUser(totalDistinctUser)
                 .issueStatusDistribution(issueStatusDistribution)
                 .totalEstimatedHour(totalEstimatedHour)
                 .totalEstimatedMinute(totalEstimatedMinute)

@@ -22,7 +22,7 @@ public class SprintReportResponse {
 
     private long totalIssues;
     private long totalAssignments;
-    private long totalDistinctDevelopers;
+    private long totalDistinctUser;
 
     private Map<String, Long> issueStatusDistribution;
 
