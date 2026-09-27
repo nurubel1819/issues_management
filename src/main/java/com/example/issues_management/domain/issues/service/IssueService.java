@@ -4,6 +4,7 @@ import com.example.issues_management.common.exception.ResourceNotFoundException;
 import com.example.issues_management.domain.issues.dtos.IssueRequest;
 import com.example.issues_management.domain.issues.dtos.IssueResponse;
 import com.example.issues_management.domain.issues.dtos.IssueRoleResponse;
+import com.example.issues_management.domain.issues.dtos.PagedIssueResponse;
 import com.example.issues_management.domain.issues.entitys.Issue;
 import com.example.issues_management.domain.issues.entitys.IssueIssueRole;
 import com.example.issues_management.domain.issues.entitys.IssueRole;
@@ -18,6 +19,9 @@ import com.example.issues_management.domain.sprints.repo.SprintRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,6 +55,25 @@ public class IssueService {
         return issueRepository.findAll().stream()
                 .map(this::toFullResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public PagedIssueResponse searchIssues(String title, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Issue> issuePage = issueRepository.searchByTitle(title, pageable);
+
+        List<IssueResponse> content = issuePage.getContent().stream()
+                .map(this::toFullResponse)
+                .collect(Collectors.toList());
+
+        return PagedIssueResponse.builder()
+                .content(content)
+                .pageNumber(issuePage.getNumber())
+                .pageSize(issuePage.getSize())
+                .totalElements(issuePage.getTotalElements())
+                .totalPages(issuePage.getTotalPages())
+                .last(issuePage.isLast())
+                .build();
     }
 
     @Transactional(readOnly = true)

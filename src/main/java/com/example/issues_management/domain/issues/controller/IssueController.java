@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.issues_management.domain.issues.dtos.PagedIssueResponse;
 
 import java.util.List;
 
@@ -33,6 +34,15 @@ public class IssueController {
     @Operation(summary = "Get all issues")
     public ResponseEntity<List<IssueResponse>> getAllIssues() {
         return ResponseEntity.ok(issueService.getAllIssues());
+    }
+
+    @GetMapping("/v2")
+    @Operation(summary = "Get all issues (v2)", description = "Returns paginated issue list, optionally filtered by title search")
+    public ResponseEntity<PagedIssueResponse> getAllIssuesV2(
+            @RequestParam(required = false) String title,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(issueService.searchIssues(title, page, size));
     }
 
     @GetMapping("/project/{projectId}")
