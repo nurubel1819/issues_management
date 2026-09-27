@@ -22,7 +22,6 @@ public class UserController {
 	private final UserService userService;
 
 	@GetMapping("/{id}")
-	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@Operation(summary = "Get user by ID", description = "Retrieves a specific user with their role information. Accessible by ADMIN and USER roles.")
 	public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
 		UserResponse response = userService.getUserById(id);
